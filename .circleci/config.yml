@@ -5,6 +5,17 @@ orbs:
   # welcome: circleci/welcome-orb@0.4.1
   # aws-cli: circleci/aws-cli@2.0.3
 # Define the jobs we want to run for this project
+
+commands:
+  # Exercise - Rollback
+  destroy_environment:
+    steps:
+      - run:
+          name: Destroy environment
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
+                       
 jobs:
   create_infrastructure: 
       docker:
@@ -16,8 +27,9 @@ jobs:
             command: |
               aws cloudformation deploy \
                 --template-file template.yml \
-                --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+                --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7} \
                 --region us-east-1
+                
   configure_infrastructure: 
     docker:
       - image: python:3.7-alpine3.11
@@ -35,6 +47,7 @@ jobs:
           command: |
             # Your command
             ansible-playbook -i inventory main-remote.yml
+      - destroy_environment
             
             
   smoke_test:
@@ -53,6 +66,7 @@ jobs:
             else
               return 1
             fi
+      - destroy_environment
          
          
          
@@ -61,6 +75,6 @@ workflows:
   # Name the workflow
   myWorkflow:
     jobs:
-      #- create_infrastructure
-      #- configure_infrastructure
+      - create_infrastructure
+      - configure_infrastructure
       - smoke_test
