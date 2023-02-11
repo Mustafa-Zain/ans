@@ -10,11 +10,17 @@ commands:
   # Exercise - Rollback
   destroy_environment:
     steps:
+      - run: # Install the AWS CLI if it is not already included in the docker image
+          name: Install awscli
+          when: on_fail
+          command: sudo pip install awscli
       - run:
           name: Destroy environment
           when: on_fail
           command: |
             aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
+            
+
                        
 jobs:
   create_infrastructure: 
