@@ -13,7 +13,7 @@ commands:
       - run: # Install the AWS CLI if it is not already included in the docker image
           name: Install awscli
           when: on_fail
-          command: sudo pip install awscli
+          command: pip install awscli
       - run:
           name: Destroy environment
           when: on_fail
