@@ -35,6 +35,7 @@ jobs:
                 --template-file template.yml \
                 --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7} \
                 --region us-east-1
+
                 
   configure_infrastructure: 
     docker:
@@ -54,6 +55,10 @@ jobs:
           name: Run Playbook and Configure server
           command: |
             # Your command
+            #touch inventory
+            echo [all] > inventory
+            aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress'  --output text >> inventory
+            cat inventory
             ansible-playbook -i inventory main-remote.yml
       - destroy_environment
             
